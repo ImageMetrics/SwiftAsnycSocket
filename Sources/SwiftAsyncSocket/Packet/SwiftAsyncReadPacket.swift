@@ -248,7 +248,9 @@ extension SwiftAsyncReadPacket {
         for _ in 0..<loopCount {
             if bufLen > 0 {
                 memcpy(&seq, buf, Int(bufLen))
-                memcpy(&seq + Int(bufLen), pre, preLen)
+                seq.withUnsafeMutableBytes { ptr in
+                    memcpy(ptr.baseAddress! + Int(bufLen), pre, preLen)
+                }
 
                 if memcmp(&seq, termBuf, termLength) == 0 {
                     result = preLen
