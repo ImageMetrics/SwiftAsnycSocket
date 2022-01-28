@@ -268,26 +268,27 @@ extension SwiftAsyncSocket {
                           writeData: Data) throws {
         //
         // Writing data directly over raw socket
-        //
-        let buffer: UnsafePointer<UInt8> = writeData.convert(offset: Int(currentWrite.bytesDone))
+        //      
+        try writeData.withUnsafeBytes { (bytes: UnsafePointer<UInt8>) in
+            let buffer = bytes + Int(currentWrite.bytesDone)
+            var bytesToWrite = writeData.count - Int(currentWrite.bytesDone)
 
-        var bytesToWrite = writeData.count - Int(currentWrite.bytesDone)
-
-        if bytesToWrite > SIZE_MAX {
-            bytesToWrite = Int(SIZE_MAX)
-        }
-
-        let result = Darwin.write(currentSocketFD, buffer, bytesToWrite)
-
-        guard result >= 0 else {
-            if errno != EWOULDBLOCK {
-                throw SwiftAsyncSocketError.errno(code: errno, reason: "Error in write() function")
+            if bytesToWrite > SIZE_MAX {
+                bytesToWrite = Int(SIZE_MAX)
             }
-            waiting = true
-            return
-        }
 
-        bytesWritten = result
+            let result = Darwin.write(currentSocketFD, buffer, bytesToWrite)
+
+            guard result >= 0 else {
+                if errno != EWOULDBLOCK {
+                    throw SwiftAsyncSocketError.errno(code: errno, reason: "Error in write() function")
+                }
+                waiting = true
+                return
+            }
+
+            bytesWritten = result
+        }
     }
 
     private func completeCurrentWrite() {
