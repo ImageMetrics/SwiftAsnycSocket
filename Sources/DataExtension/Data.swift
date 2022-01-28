@@ -10,12 +10,14 @@ import Foundation
 
 extension Data {
     func convert<DataType>(offset: Int = 0) -> UnsafePointer<DataType> {
-        return self.withUnsafeBytes { (buffer: UnsafePointer<DataType>) -> UnsafePointer<DataType> in
-            return buffer} + offset
+        let nsData = self as NSData
+        let ptr = nsData.bytes.assumingMemoryBound(to: DataType.self)
+        return ptr + offset
     }
 
     mutating func convertMutable<T>(offset: Int = 0) -> UnsafeMutablePointer<T> {
-        return self.withUnsafeMutableBytes { (buffer: UnsafeMutablePointer<T>) -> UnsafeMutablePointer<T> in
-            return buffer} + offset
+        let nsData = self as NSData
+        let ptr = nsData.bytes.assumingMemoryBound(to: T.self)
+        return UnsafeMutablePointer<T>(mutating: ptr) + offset
     }
 }

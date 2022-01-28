@@ -269,8 +269,8 @@ extension SwiftAsyncSocket {
         //
         // Writing data directly over raw socket
         //      
-        try writeData.withUnsafeBytes { (bytes: UnsafePointer<UInt8>) in
-            let buffer = bytes + Int(currentWrite.bytesDone)
+        let buffer: UnsafePointer<UInt8> = writeData.convert(offset: Int(currentWrite.bytesDone))
+
             var bytesToWrite = writeData.count - Int(currentWrite.bytesDone)
 
             if bytesToWrite > SIZE_MAX {
@@ -289,7 +289,6 @@ extension SwiftAsyncSocket {
 
             bytesWritten = result
         }
-    }
 
     private func completeCurrentWrite() {
         guard let currentWrite = currentWrite as? SwiftAsyncWritePacket else {

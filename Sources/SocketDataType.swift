@@ -186,7 +186,7 @@ public extension SocketDataType {
     }
 
     private static func getDataFrom(other interface: String?, port: UInt16) -> SocketDataType? {
-        let iface: UnsafePointer<Int8>? = (interface as NSString?)?.utf8String
+        let iface: UnsafePointer<Int8>? = interface?.data(using: .utf8)?.convert()
 
         var addrs: UnsafeMutablePointer<ifaddrs>?
 
